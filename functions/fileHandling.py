@@ -27,7 +27,11 @@ def fileretrieval(file,url,expectedUpdate):
     # Retrieve file
     if retrieveFile:
         print("Retrieving File")
+        print("")
         urllib.request.urlretrieve(url, file)
+    else:
+        print("Using exsisting file.")
+        print("")
     # Read file
     with open(file) as f:
         data = json.load(f)    
@@ -38,19 +42,20 @@ def fileretrieval(file,url,expectedUpdate):
 #    printFileStats function
 #
 def printFileStats(data):
-##############################################################################
-##                           file statistics                                ##
-##############################################################################
+    ##############################################################################
+    ##                           file statistics                                ##
+    ##############################################################################
 
     firstDataDate = datetime.date.fromisoformat(data[0]["Date_of_statistics"])
     lastDataDate = datetime.date.fromisoformat(data[-1]["Date_of_statistics"])
     
     print("First date of data: ",firstDataDate)
     print("Last date of data: ",lastDataDate)
+    print("   ")
 
-##############################################################################
-##                     Repeat most recent statistics                        ##
-##############################################################################
+    ##############################################################################
+    ##                     Repeat most recent statistics                        ##
+    ##############################################################################
 
     Tested    = 0
     TestedPos = 0
