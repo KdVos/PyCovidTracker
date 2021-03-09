@@ -5,7 +5,9 @@ Spyder Editor
 This is a temporary script file.
 """
 # Imports
-from functions import fileHandling, dataManipulation
+from functions import fileHandling
+from classes.dataPoint import *
+
 import datetime 
 
 import matplotlib.pyplot as plt
@@ -27,45 +29,50 @@ fileHandling.printFileStats(data)
 ##############################################################################
 # Compile list of daytotals
 
-days      = []
-daytotals = []
-dayposit  = []
-percent   = []
+dataPoints = dataSet()
 
 for item in data:
    itemDate    = datetime.date.fromisoformat(item["Date_of_statistics"])
    itemTotal   = item["Tested_with_result"]
    itemPositive= item["Tested_positive"]
-   if(itemDate in days): 
-      idx             = days.index(itemDate)
-      daytotals[idx] += itemTotal
-      dayposit[idx]  += itemPositive
-      percent[idx]    = dayposit[idx]/daytotals[idx]
-      pass
-   else:
-       days.append(itemDate)
-       daytotals.append(itemTotal)
-       dayposit.append(itemPositive)
-       percent.append(itemPositive/itemTotal)
-       
+   itemRegion  = item["Security_region_name"]
 
-movpositive = dataManipulation.movmean(dayposit, 7)
-movtotal    = dataManipulation.movmean(daytotals, 7)  
-movpercent  = movpositive/movtotal
-  
+   itemPoint = dataPoint(itemDate,(itemTotal,itemPositive),itemRegion)   
+   dataPoints.addRecord(dataPoint= itemPoint)
+
+dayData = dataPoints.getDayTotals()
+
+##############################################################################
+#     Plotting 
+##############################################################################
 fig1, ax1 = plt.subplots()
-ax1.scatter(days,dayposit,2, color= 'red')
-ax1.plot(days,movpositive,color='red')
+ax1.grid('minor')
+## Positive cases plot
+ax1.plot(dayData["Date"],dayData["smoothPositive"],2, color= 'red')
+ax1.scatter(dayData["Date"],dayData["Positive"],2, color= 'red')
 
+plt.xlabel("Date")
+plt.ylabel("Positive Tests")
+
+ax1.set_xlim(left = dayData["Date"][0] ,right = dayData["Date"][-1])
+ax1.set_ylim(bottom = 0, top = max(dayData["Positive"]))
+
+## Percentage plot
 ax3 = ax1.twinx()
-ax3.scatter(days,percent,2, color= 'black')
-ax3.plot(days,movpercent,color='black')
+ax3.plot(dayData["Date"],dayData["smoothPercentage"],2, color= 'black')
+ax3.scatter(dayData["Date"],dayData["Percentage"],2, color= 'black')
 
-ax1.xaxis.set_major_locator(ticker.MaxNLocator(6))
+ax3.set_xlim(left = dayData["Date"][0] ,right = dayData["Date"][-1])
+ax3.set_ylim(bottom = 0, top = max(dayData["Percentage"]))
+
+plt.ylabel("Percentage of Pos. Tests")
+
+ax1.xaxis.set_major_locator(ticker.MaxNLocator(5))
 fig1.savefig("Percentage_vs_Cases.pdf")
 
-ax1.set_xlim(left = datetime.datetime.today()-datetime.timedelta(days=50) ,right = datetime.datetime.today())
-ax1.set_ylim(bottom = 0.8*min(movpositive[-50:]), top = 1.2*max(movpositive[-50:]))
-ax3.set_ylim(bottom = 0.8*min(movpercent[-50:]), top = 1.2*max(movpercent[-50:]))
+N_zoom = 100
+ax1.set_xlim(left = datetime.datetime.today()-datetime.timedelta(days=100) ,right = datetime.datetime.today())
+ax1.set_ylim(bottom = 0.8*min(dayData["smoothPositive"][-100:]), top = 1.2*max(dayData["smoothPositive"][-100:]))
+ax3.set_ylim(bottom = 0.8*min(dayData["smoothPercentage"][-100:]), top = 1.2*max(dayData["smoothPercentage"][-100:]))
 
 fig1.savefig("Percentage_vs_Cases_recentzoom.pdf")
