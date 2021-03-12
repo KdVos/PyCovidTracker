@@ -1,9 +1,38 @@
 import urllib.request
 import json
+import csv
 import os
 
 import datetime
+#
+#
+#
+def csvParsing(filename,cols):
 
+    data = {}
+    for col in cols:
+        data[col] = []
+    
+    with open(filename) as f:
+        csv_read = csv.reader(f,delimiter=',')        
+        col_head = True
+        
+        for rows in csv_read:
+            if col_head:
+                col_head = False                
+            else:
+                for i in range(0,len(cols)):
+                    try:
+                        if (rows[i].isnumeric()):
+                            data[cols[i]].append(int(rows[i]))
+                        else:
+                            data[cols[i]].append(rows[i])
+                    except:
+                        print(rows)
+                        pass
+        return data 
+                            
+            
 #
 # fileretrieval function
 #

@@ -41,3 +41,27 @@ def movmean(data,N):
         mean[(len(data)-1)-i]     =   sum(range_mean)/len(range_mean)
         
     return mean
+
+def diff(data):    
+    diffdata = np.array(data[0:]) - np.hstack([0,data[0:-1]])    
+    return diffdata
+
+def regionSummation(data):
+    regions = []
+    inhabs  = []
+    results = {}
+    
+    for i in range(0,len(data["Inwoners"])):
+        Inhab_i = data["Inwoners"][i]
+        Regio_i = data["VeiligheidsRegio"][i]
+        
+        if Regio_i not in regions:
+            regions.append(Regio_i)
+            inhabs.append(Inhab_i)
+        else:
+            pass
+            
+    results["VeiligheidsRegio"] = regions
+    results["Inwoners"] = inhabs
+    return results
+                
